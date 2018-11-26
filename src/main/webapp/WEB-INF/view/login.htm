@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>欢迎登录</title>
+    <link rel="stylesheet" type="text/css" href="/skin/js/jquery-easyui-1.3.5/themes/icon.css"/>
+    <link rel="stylesheet" type="text/css" href="/skin/js/jquery-easyui-1.3.5/themes/gray/easyui.css"/>
+</head>
+
+<body>
+<div id="loginWin" class="easyui-window" title="登录" style="width:350px;height:250px;padding:5px;"
+     minimizable="false" maximizable="false" resizable="false" collapsible="false">
+    <div class="easyui-layout" fit="true">
+        <div region="center" border="false" style="padding:5px;background:#fff;border:1px solid #ccc;">
+            <form id="loginForm" method="post" action="/login.do">
+                <div style="padding:5px 0;">
+                    <label for="account">帐&nbsp;号:</label>
+                    <input type="text" id="account" name="account" style="width:150px;" />
+                </div>
+                <div style="padding:5px 0;">
+                    <label for="password">密&nbsp;码:</label>
+                    <input type="password" id="password" name="password" style="width:150px;"/>
+                </div>
+                <div style="padding:5px 0;">
+                    <label for="captcha">验证码:</label>
+                    <input type="text" id="captcha" name="captcha" style="width:60px;" />
+                    <img src="/captcha.svl" style="height: 31px;" onclick="this.src='/captcha.svl?d='+new Date()" class="code" alt="换一张" /><a href="javascript:void(0);" onclick="$('.code').attr('src','/captcha.svl?d='+new Date())" title="换一张">换一张</a>
+                </div>
+                <div style="padding:5px 0;text-align: center;color: red;" id="showMsg">${(error)!}</div>
+            </form>
+        </div>
+        <div region="south" border="false" style="text-align:right;padding:5px 0;">
+            <a href="/register.do" class="easyui-linkbutton" style="float: left; margin-top: 10px;">注册</a>
+            <a class="easyui-linkbutton" iconCls="icon-ok" href="javascript:void(0)" onclick="login()">登录</a>
+            <a class="easyui-linkbutton" iconCls="icon-cancel" href="javascript:void(0)" onclick="clearData()">重置</a>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/skin/js/jquery-1.7.2.js"></script>
+<script type="text/javascript" src="/skin/js/jquery-easyui-1.3.5/jquery.easyui.min.js"></script>
+<script type="text/javascript">
+    document.onkeydown = function(e){
+        var event = e || window.event;
+        var code = event.keyCode || event.which || event.charCode;
+        if (code == 13) {
+            login();
+        }
+    }
+    $(function(){
+        $("input[name='account']").focus();
+    });
+    function clearData(){
+        $('#loginForm').form('clear');
+    }
+    function login(){
+        if($("input[name='account']").val()=="" || $("input[name='password']").val()==""){
+            $("#showMsg").html("用户名或密码为空，请输入");
+            $("input[name='account']").focus();
+        }else{
+            $("#loginForm").submit();
+        }
+    }
+</script>
+</html>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<!--session实例化-->
+	<bean id="sessionProvider" class="com.lionxxw.kqsystem.code.web.HttpSessionProvider"/>
+	<!--自定义规则MD5加密-->
+	<bean id="encodeMd5" class="com.lionxxw.kqsystem.code.encode.EncodeMd5Impl"/>
+</beans>

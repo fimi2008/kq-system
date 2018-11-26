@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:javaee="http://java.sun.com/xml/ns/javaee"
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+         id="WebApp_ID" version="2.4">
+  <display-name>Archetype Created Web Application</display-name>
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>classpath:application-context.xml</param-value>
+  </context-param>
+  <!--spring容器的监听器-->
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+  <!-- Oscached Fitter配置 -->
+  <!--<filter>
+      <filter-name>CacheFilter</filter-name>
+      <filter-class>com.opensymphony.oscache.web.filter.CacheFilter</filter-class>
+      <init-param>
+          <param-name>time</param-name>
+          <param-value>7200</param-value>&lt;!&ndash;2小时 单位秒&ndash;&gt;
+      </init-param>
+      <init-param>
+          <param-name>scope</param-name>
+          <param-value>application</param-value>
+      </init-param>
+  </filter>
+  <filter-mapping>
+          <filter-name>CacheFilter</filter-name>
+          <url-pattern>/product/display/*</url-pattern>&lt;!&ndash;缓存url&ndash;&gt;
+  </filter-mapping>-->
+
+  <!--springmvc 配置前台-->
+  <servlet>
+    <servlet-name>spring</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath:springmvc.xml</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>*.do</url-pattern>
+  </servlet-mapping>
+
+  <!--中文过滤器 开始-->
+  <filter>
+    <filter-name>encoding</filter-name>
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>encoding</filter-name>
+    <url-pattern>*.do</url-pattern>
+  </filter-mapping>
+  <!--中文过滤器 结束-->
+
+  <!--验证码servlet配置开始-->
+  <servlet>
+    <servlet-name>captcha</servlet-name>
+    <servlet-class>com.lionxxw.kqsystem.code.captcha.JcaptchaServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>captcha</servlet-name>
+    <url-pattern>/captcha.svl</url-pattern>
+  </servlet-mapping>
+  <!--验证码servlet配置结束-->
+
+  <!--druid监控的配置开始-->
+  <filter>
+    <filter-name>DruidWebStatFilter</filter-name>
+    <filter-class>com.alibaba.druid.support.http.WebStatFilter</filter-class>
+    <init-param>
+      <param-name>exclusions</param-name>
+      <param-value>*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>DruidWebStatFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <!--配置好后访问 http://ip：port/projectName/druid/index.html-->
+  <servlet>
+    <servlet-name>DruidStatView</servlet-name>
+    <servlet-class>com.alibaba.druid.support.http.StatViewServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>DruidStatView</servlet-name>
+    <url-pattern>/druid/*</url-pattern>
+  </servlet-mapping>
+  <!--druid监控的配置结束-->
+
+</web-app>

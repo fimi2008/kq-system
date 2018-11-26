@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <#include "../../common/head.htm">
+    <script type="text/javascript" src="/skin/js/dateformat.js"></script>
+    <!--载入fckeditor类-->
+    <script type="text/javascript" src="/skin/fckeditor/fckeditor.js"></script>
+    <style type="text/css">
+        #fm {
+            margin: 0;
+            padding: 10px 30px;
+        }
+        .fitem{
+            margin: 5px 5px 0;
+        }
+        .fitem label {
+            display: inline-block;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+<#if order??>
+    <div>
+        <form id="fm" method="post" action="/kqs/order/now.do">
+            <input type="hidden" name="orderId" value="${(order.id)!}" />
+            <div class="fitem">
+                <label>点餐日期</label>
+                ${(order.orderDate?string('yyyy-MM-dd'))!}
+            </div>
+            <div class="fitem">
+                <label>截止时间</label>
+                ${(order.endTimeStr)!}
+            </div>
+            <div class="fitem">
+                <label>点餐选项</label>
+                <#if order?? && order.options??>
+                    <#list order.options as option>
+                        <input type="radio" <#if result?? && result.optionId == option.id>checked="true"</#if> name="optionId" value="${(option.id)!}" id="option_${(option.id)!}"/><label for="option_${(option.id)!}" ondblclick="myDblClick(${(option.tempId)!});">${(option.name)!}</label>
+                    </#list>
+                </#if>
+            </div>
+            <div class="fitem">
+                <label>备注</label>
+                ${(order.note)!}
+            </div>
+        </form>
+        <div id="dlg-buttons">
+            <#if result??>
+                <#if result.state == 1>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" iconcls="icon-undo">退订</a>
+                </#if>
+                <#if result.state == -1>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" iconcls="icon-save">报名</a>
+                </#if>
+                <#else>
+                    <#if order?? && order.state == 1>
+                        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" iconcls="icon-save">报名</a>
+                    </#if>
+            </#if>
+        </div>
+    </div>
+    <div id="dlg2" class="easyui-dialog" style="width: 1000px; height: 600px; padding: 10px 20px;"
+         closed="true" buttons="#dlg2-buttons">
+        <form id="fm2" method="post">
+            <input type="hidden" name="id"/>
+            <div class="fitem" id="fck_editer">
+                <label>内容</label>
+                <textarea rows="10" cols="10" id="fck_note" name="note" required="true"></textarea>
+            </div>
+        </form>
+    </div>
+    <div id="dlg2-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#dlg2').dialog('close')" iconcls="icon-cancel">取消</a>
+    </div>
+<#else>
+    <h2>点餐管理员暂未发布,请稍后查看...</h2>
+</#if>
+
+<script type="text/javascript" src="/skin/js/validate_ex.js"></script>
+<script>
+    var url = '';
+    var clickFun = null;
+    function myDblClick(id) {
+        clearTimeout(clickFun);
+        editData(id);
+        //alert("双击事件：值为" + obj.value);
+    }
+    function initFck(){
+        $("#fck_editer").html('<label>内容</label><textarea rows="10" cols="10" id="fck_note" name="note" required="true"></textarea>');
+    }
+    function publish(id){
+        url = "/kqs/order/confirmPublish.do";
+        ajaxRequest(id);
+    }
+
+    function cancel(id){
+        url = "/kqs/order/cancelPublish.do";
+        ajaxRequest(id);
+    }
+
+    function ajaxRequest(id){
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {id:id},
+            dataType: "json",
+            success: function(data){
+                var jsondata = null;//eval('(' + data + ')');
+                if (data instanceof Object){
+                    jsondata = data;
+                }else{
+                    jsondata = eval('(' + data + ')');
+                }
+                if (jsondata.status == 200){
+                    $.messager.alert('操作提示', jsondata.message, 'info', function(){
+                        window.location.reload();
+                    });
+                }else{
+                    $.messager.alert('操作提示', jsondata.message, 'error');
+                }
+            }
+        });
+    }
+    function editData(id) {
+        //console.log(row);
+        $("#dlg2").dialog("open").dialog('setTitle', '选项详情');
+        $('#fm2').form('clear');
+        initFck();
+        $("#fm2").form("load", "/kqs/order/editTemplate.do?id=" + id);
+        openFck();
+        url = "/kqs/order/editTemplate.do";
+    }
+    function openFck(){
+        var fck = new FCKeditor("fck_note");
+        fck.BasePath = "/skin/fckeditor/";
+        fck.Height = 400 ;
+        fck.Config["ImageUploadURL"] = "/api/upload/uploadFck.do"; // 配置fck上传url
+        fck.ReplaceTextarea();
+    }
+    function submitForm(){
+        $('#fm').form('submit',{
+            onSubmit:function(){
+                return $(this).form('validate');
+            },
+            success:function(data){
+                var jsondata = null;//eval('(' + data + ')');
+                if (data instanceof Object){
+                    jsondata = data;
+                }else{
+                    jsondata = eval('(' + data + ')');
+                }
+                if (jsondata.status == 200){
+                    $.messager.alert('操作提示', jsondata.message, 'info', function(){
+                        window.location.reload();
+                    });
+                }else{
+                    $.messager.alert('操作提示', jsondata.message, 'error');
+                }
+            }
+        });
+    }
+    function clearForm(){
+        $('#fm').form('clear');
+    }
+</script>
+</body>
+</html>

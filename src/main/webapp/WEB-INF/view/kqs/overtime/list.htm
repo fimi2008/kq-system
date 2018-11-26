@@ -1,0 +1,235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <#include "../../common/head.htm">
+    <script type="text/javascript" src="/skin/js/dateformat.js"></script>
+    <style type="text/css">
+        #fm {
+            margin: 0;
+            padding: 10px 30px;
+        }
+        .ftitle {
+            font-size: 14px;
+            font-weight: bold;
+            padding: 5px 0;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .fitem {
+            margin-bottom: 5px;
+        }
+        .fitem label {
+            display: inline-block;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div style="height: 30px;">
+        <form method="post" id="ex_form">
+            日期:
+            <input id="workDateS" name="workDateS" class ="easyui-datebox" style="width: 150px" />
+            至
+            <input id="workDateE" name="workDateE" class="easyui-datebox" style="width: 150px" />
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search'" onclick="reloadgrid()" style="vertical-align: middle;">Search</a>
+        </form>
+    </div>
+    <table id="datagrid"></table>
+</div>
+<div id="dlg" class="easyui-dialog" style="width: 450px; height: 320px; padding: 10px 20px;"
+     closed="true" buttons="#dlg-buttons">
+    <form id="fm" method="post">
+        <input type="hidden" name="id" id="id" />
+        <div class="fitem">
+            <label>加班日期</label>
+            <input name="workDateStr" class="easyui-datebox" required="true" data-options="sharedCalendar:'#cc'" style="width:180px;"/>
+        </div>
+        <div class="fitem">
+            <label>开始时间</label>
+            <input name="startTime" class="easyui-timespinner" style="width:180px;">
+        </div>
+        <div class="fitem">
+            <label>结束时间</label>
+            <input name="endTime" class="easyui-timespinner" style="width:180px;">
+        </div>
+        <div class="fitem">
+            <label>总计(单位:小时)</label>
+            <input name="totalHouse" class="input easyui-numberbox" min="0.5" value="1" max="12" precision="1" type="text" style="width:180px;" />
+        </div>
+        <div class="fitem">
+            <label>备注</label>
+            <input name="note" class="easyui-vlidatebox" data-options="multiline:true" style="width:180px;height:60px" />
+        </div>
+    </form>
+    <div id="cc" class="easyui-calendar"></div>
+</div>
+<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="saveData()" iconcls="icon-save">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#dlg').dialog('close')"
+       iconcls="icon-cancel">取消</a>
+</div>
+<script type="text/javascript">
+    $(function () {
+        /**
+         * 界面会传过去2个参数,第一个参数是当前页page,第二个参数每页显示多少条rows
+         */
+        $("#datagrid").datagrid({
+            columns: [[
+                {checkbox: true},//复选框
+                {title: "加班日期", width: 100, field: 'workDate',formatter: formatDatebox_day},
+                {title: "开始时间", width: 100, field: 'startTime'},
+                {title: "结束时间", width: 100, field: 'endTime'},
+                {title: "总计(单位:小时)", width: 100, field: 'totalHouse'},
+                {title: "创建时间", width: 100, field: 'createTime',formatter: formatDatebox_time},
+                {title: "备注", width: 100, field: 'note'},
+            ]],
+            fitColumns: true,
+            url: "/kqs/overtime/getOvertimeDatas.do",
+            toolbar: [
+                {
+                    text: "新增",
+                    iconCls: 'icon-add',
+                    handler: function () {
+                        newData();
+                    }
+                },"-",
+                {
+                    text: "删除",
+                    iconCls: 'icon-remove',
+                    handler: function () {
+                        destroyData();
+                    }
+                },"-",
+                {
+                    text: "导出",
+                    iconCls: 'icon-undo',
+                    handler: function () {
+                        exportData();
+                    }
+                }
+            ],
+            onLoadSuccess: function (data) {
+                //console.log("开始打印服务器返回数据");
+                //console.log(data);
+            }, // 加载数据后执行
+            onDblClickRow: function (rowIndex, rowData) {
+                editData(rowData);
+            },
+            loadMsg: "数据正在加载,请稍后...", // 加载数据中,提示信息
+            method: "POST",
+            pagination: true,// 分页工具栏
+            rownumbers: true, // 显示行号
+//                singleSelect:true // 只能单选 (和复选框不可共用)
+            striped: true // 显示斑马线效果
+        });
+    });
+    var url;
+    var type;
+    function newData() {
+        $("#dlg").dialog("open").dialog('setTitle', '新增加班记录'); ;
+        $("#fm").form("clear");
+        url = "/kqs/overtime/add.do";
+    }
+    function editData(row) {
+        //console.log(row);
+        if (row) {
+            $("#dlg").dialog("open").dialog('setTitle', '编辑加班记录');
+            $('#ff').form('clear');
+            $("#fm").form("load", "/kqs/overtime/edit.do?id=" + row.id);
+            url = "/kqs/overtime/edit.do";
+        }
+    }
+    function saveData() {
+        $("#fm").form("submit", {
+            url: url,
+            onsubmit: function () {
+                return $(this).form("validate");
+            },
+            success: function (data) {
+                var jsondata = null;//eval('(' + data + ')');
+                if (data instanceof Object){
+                    jsondata = data;
+                }else{
+                    jsondata = eval('(' + data + ')');
+                }
+                if (jsondata.status == 200){
+                    $.messager.alert('操作提示', jsondata.message, 'info', function(){
+                        $("#dlg").dialog("close");
+                        //$("#datagrid").datagrid("reload");
+                        reloadgrid();
+                    });
+                }else{
+                    $.messager.alert('操作提示', jsondata.message, 'error');
+                }
+            }
+        });
+    }
+    function destroyData() {
+       // var row = $('#datagrid').datagrid('getSelected');//返回选中一行 这个是注释过的  就是取一个
+        var row = $('#datagrid').datagrid("getSelections");//返回选中多行
+        //判断是否选中行
+        if (row.length==0) {
+            $.messager.alert("提示", "请选择要删除的行！", "info");
+            return;
+        }else{
+            //console.log(row);
+            $.messager.confirm('Confirm', '你确定删除吗?', function (r) {
+                if (r) {
+                    var ids= "";
+                    for (var i = 0; i < row.length; i++) {
+                        ids += row[i].id + ",";
+                    }
+                    console.log(ids);
+                    $.post('/kqs/overtime/del.do', { ids: ids}, function (data) {
+                        var jsondata = null;//eval('(' + data + ')');
+                        if (data instanceof Object){
+                            jsondata = data;
+                        }else{
+                            jsondata = eval('(' + data + ')');
+                        }
+                        if (jsondata.status == 200) {
+                            $.messager.alert('操作提示', jsondata.message, 'info', function(){
+                                reloadgrid();
+                                //$('#datagrid').datagrid('reload');    // reload the user data
+                            });
+                        } else {
+                            $.messager.show({   // show error message
+                                title: '异常提示',
+                                msg: jsondata.message
+                            });
+                        }
+                    }, 'json');
+                }
+            });
+        }
+    }
+
+    function exportData(){
+        var url = '/kqs/overtime/export.do';
+        $("#ex_form").attr("action", url);
+        $("#ex_form").submit();
+    }
+
+    function reloadgrid(){
+        //查询参数直接添加在queryParams中
+        var queryParams = $('#datagrid').datagrid('options').queryParams;
+        getQueryParams(queryParams);
+        $('#datagrid').datagrid('options').queryParams = queryParams;
+        $("#datagrid").datagrid('reload');
+    }
+
+    //获取参数
+    function getQueryParams(queryParams) {
+        var workDateS = $("#workDateS").datebox("getValue");
+        var workDateE = $("#workDateE").datebox("getValue");
+
+        queryParams.workDateS = workDateS;
+        queryParams.workDateE = workDateE;
+
+        return queryParams;
+    }
+</script>
+</body>
+</html>

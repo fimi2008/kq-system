@@ -1,0 +1,85 @@
+{
+  "total": 1000,
+  "rows": [
+    {
+      "ceci": "G118",
+      "startstate": "北京/青岛",
+      "starttime": "9点10分<br>14点整",
+      "totaltime": "1小时20分钟",
+      "swz": "有",
+      "bz": "<a id='btn' href='#' class='easyui-linkbutton'>预定</a>"
+    },
+    {
+      "ceci": "G118",
+      "startstate": "北京/青岛",
+      "starttime": "9点10分<br>14点整",
+      "totaltime": "1小时20分钟",
+      "swz": "有",
+      "bz": "有"
+    },
+    {
+      "ceci": "G118",
+      "startstate": "北京/青岛",
+      "starttime": "9点10分<br>14点整",
+      "totaltime": "1小时20分钟",
+      "swz": "有",
+      "bz": "有"
+    },
+    {
+      "ceci": "G118",
+      "startstate": "北京/青岛",
+      "starttime": "9点10分<br>14点整",
+      "totaltime": "1小时20分钟",
+      "swz": "有",
+      "bz": "有"
+    },
+    {
+      "ceci": "G118",
+      "startstate": "北京/青岛",
+      "starttime": "9点10分<br>14点整",
+      "totaltime": "1小时20分钟",
+      "swz": "有",
+      "bz": "有"
+    },
+    {
+      "ceci": "G118",
+      "startstate": "北京/青岛",
+      "starttime": "9点10分<br>14点整",
+      "totaltime": "1小时20分钟",
+      "swz": "有",
+      "bz": "有"
+    },
+    {
+      "ceci": "G118",
+      "startstate": "北京/青岛",
+      "starttime": "9点10分<br>14点整",
+      "totaltime": "1小时20分钟",
+      "swz": "有",
+      "bz": "有"
+    },
+    {
+      "ceci": "G118",
+      "startstate": "北京/青岛",
+      "starttime": "9点10分<br>14点整",
+      "totaltime": "1小时20分钟",
+      "swz": "有",
+      "bz": "有"
+    },
+    {
+      "ceci": "G118",
+      "startstate": "北京/青岛",
+      "starttime": "9点10分<br>14点整",
+      "totaltime": "1小时20分钟",
+      "swz": "有",
+      "bz": "有"
+    },
+    {
+      "ceci": "G118",
+      "startstate": "北京/青岛",
+      "starttime": "9点10分<br>14点整",
+      "totaltime": "1小时20分钟",
+      "swz": "有",
+      "bz": "有"
+    }
+  ]
+}

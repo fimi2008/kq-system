@@ -1,0 +1,275 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <#include "../../common/head.htm">
+    <script type="text/javascript" src="/skin/js/dateformat.js"></script>
+    <!--载入fckeditor类-->
+    <script type="text/javascript" src="/skin/fckeditor/fckeditor.js"></script>
+    <style type="text/css">
+        #fm {
+            margin: 0;
+            padding: 10px 30px;
+        }
+        .fitem label {
+            display: inline-block;
+            width: 100px;
+        }
+        .select_side p{
+            line-height: 12px;
+        }
+        .select_side select{
+            min-width: 130px;
+            min-height: 150px;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <form id="fm" method="post" action="/kqs/order/publish.do">
+        <input type="hidden" name="id" id="id" />
+        <div class="fitem">
+            <label>点餐日期</label>
+            <input name="orderDateStr" class="easyui-datebox" required="true" data-options="sharedCalendar:'#cc'" style="width:180px;" value="${(order.orderDate?string('yyyy-MM-dd'))!}"/>
+        </div>
+        <div class="fitem">
+            <label>截止时间</label>
+            <input name="endTimeStr" class="easyui-timespinner" style="width:180px;" value="${(order.endTimeStr)!}">
+        </div>
+        <div class="fitem">
+            <label>点餐选项</label>
+            <table style="display: inline-block;">
+                <tr>
+                    <td>
+                        <div class="select_side">
+                            <input type="hidden" name="tempIds" id="tempIds">
+                            <p>已选</p>
+                            <select multiple size="5" name="list1" id="list1" ondblclick="myDblClick(this);">
+                                <#if order?? && order.options??>
+                                    <#list order.options as option>
+                                        <option value="${(option.id)!}">${(option.name)!} </option>
+                                    </#list>
+                                </#if>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <input type="button" value=" >> " onclick="move(this.form.list1,this.form.list2)" name="B1">
+                        <input type="button" value=" << " onclick="move(this.form.list2,this.form.list1)" name="B2">
+                    </td>
+                    <td>
+                        <div class="select_side">
+                            <p>模板</p>
+                            <select multiple size="5" name="list2" ondblclick="myDblClick(this);">
+                                <#if templates??>
+                                    <#list templates as template>
+                                        <option value="${template.id}"> ${template.name} </option>
+                                    </#list>
+                                </#if>
+                            </select>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="fitem">
+            <label>备注</label>
+            <input name="note" class="easyui-vlidatebox" data-options="multiline:true" style="width:180px;height:60px" value="${(order.note)!}"/>
+        </div>
+    </form>
+    <div id="cc" class="easyui-calendar"></div>
+    <div id="dlg-buttons">
+        <#if order??>
+            <#if order.state == 0>
+                <a href="javascript:void(0)" class="easyui-linkbutton" onclick="publish(${(order.id)!})" iconcls="icon-ok">发布</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" onclick="cancel(${(order.id)!})" iconcls="icon-no">作废</a>
+            </#if>
+        <#else>
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" iconcls="icon-save">保存</a>
+        </#if>
+    </div>
+</div>
+<div id="dlg2" class="easyui-dialog" style="width: 1000px; height: 600px; padding: 10px 20px;"
+     closed="true" buttons="#dlg2-buttons">
+    <form id="fm2" method="post">
+        <input type="hidden" name="id"/>
+        <div class="fitem" id="fck_editer">
+            <label>内容</label>
+            <textarea rows="10" cols="10" id="fck_note" name="note" required="true"></textarea>
+        </div>
+    </form>
+</div>
+<div id="dlg2-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="editTemp()" iconcls="icon-save">修改</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#dlg2').dialog('close')" iconcls="icon-cancel">取消</a>
+</div>
+<script type="text/javascript" src="/skin/js/validate_ex.js"></script>
+<script>
+    var url = '';
+    var clickFun = null;
+    function myDblClick(obj) {
+        clearTimeout(clickFun);
+        editData(obj.value);
+        //alert("双击事件：值为" + obj.value);
+    }
+    function initFck(){
+        $("#fck_editer").html('<label>内容</label><textarea rows="10" cols="10" id="fck_note" name="note" required="true"></textarea>');
+    }
+    function publish(id){
+        url = "/kqs/order/confirmPublish.do";
+        ajaxRequest(id);
+    }
+
+    function cancel(id){
+        url = "/kqs/order/cancelPublish.do";
+        ajaxRequest(id);
+    }
+
+    function ajaxRequest(id){
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {id:id},
+            dataType: "json",
+            success: function(data){
+                var jsondata = null;//eval('(' + data + ')');
+                if (data instanceof Object){
+                    jsondata = data;
+                }else{
+                    jsondata = eval('(' + data + ')');
+                }
+                if (jsondata.status == 200){
+                    $.messager.alert('操作提示', jsondata.message, 'info', function(){
+                        window.location.reload();
+                    });
+                }else{
+                    $.messager.alert('操作提示', jsondata.message, 'error');
+                }
+            }
+        });
+    }
+    function editData(id) {
+        //console.log(row);
+        $("#dlg2").dialog("open").dialog('setTitle', '编辑选项模板');
+        $('#fm2').form('clear');
+        initFck();
+        $("#fm2").form("load", "/kqs/order/editTemplate.do?id=" + id);
+        openFck();
+        url = "/kqs/order/editTemplate.do";
+    }
+    function editTemp() {
+        $("#fm2").form("submit", {
+            url: url,
+            onsubmit: function () {
+                return $(this).form("validate");
+            },
+            success: function (data) {
+                var jsondata = null;//eval('(' + data + ')');
+                if (data instanceof Object){
+                    jsondata = data;
+                }else{
+                    jsondata = eval('(' + data + ')');
+                }
+                if (jsondata.status == 200){
+                    $.messager.alert('操作提示', jsondata.message, 'info', function(){
+                        $("#dlg2").dialog("close");
+                    });
+                }else{
+                    $.messager.alert('操作提示', jsondata.message, 'error');
+                }
+            }
+        });
+    }
+    function openFck(){
+        var fck = new FCKeditor("fck_note");
+        fck.BasePath = "/skin/fckeditor/";
+        fck.Height = 400 ;
+        fck.Config["ImageUploadURL"] = "/api/upload/uploadFck.do"; // 配置fck上传url
+        fck.ReplaceTextarea();
+    }
+    function submitForm(){
+        var str = $("#list1 option").map(function(){return $(this).val();}).get().join(", ")
+        $("#tempIds").val(str);
+        $('#fm').form('submit',{
+            onSubmit:function(){
+                return $(this).form('validate');
+            },
+            success:function(data){
+                var jsondata = null;//eval('(' + data + ')');
+                if (data instanceof Object){
+                    jsondata = data;
+                }else{
+                    jsondata = eval('(' + data + ')');
+                }
+                if (jsondata.status == 200){
+                    $.messager.alert('操作提示', jsondata.message, 'info', function(){
+                        window.location.reload();
+                    });
+                }else{
+                    $.messager.alert('操作提示', jsondata.message, 'error');
+                }
+            }
+        });
+    }
+    function clearForm(){
+        $('#fm').form('clear');
+    }
+    //<!-- Begin
+    sortitems = 1;  // Automatically sort items within lists? (1 or 0)
+    function move(fbox,tbox) {
+        for(var i=0; i<fbox.options.length; i++) {
+            if(fbox.options[i].selected && fbox.options[i].value != "") {
+                var no = new Option();
+                no.value = fbox.options[i].value;
+                no.text = fbox.options[i].text;
+                tbox.options[tbox.options.length] = no;
+                fbox.options[i].value = "";
+                fbox.options[i].text = "";
+            }
+        }
+        BumpUp(fbox);
+        if (sortitems) SortD(tbox);
+    }
+    function BumpUp(box)  {
+        for(var i=0; i<box.options.length; i++) {
+            if(box.options[i].value == "")  {
+                for(var j=i; j<box.options.length-1; j++)  {
+                    box.options[j].value = box.options[j+1].value;
+                    box.options[j].text = box.options[j+1].text;
+                }
+                var ln = i;
+                break;
+            }
+        }
+        if(ln < box.options.length)  {
+            box.options.length -= 1;
+            BumpUp(box);
+        }
+    }
+    function SortD(box)  {
+        var temp_opts = new Array();
+        var temp = new Object();
+        for(var i=0; i<box.options.length; i++)  {
+            temp_opts[i] = box.options[i];
+        }
+        for(var x=0; x<temp_opts.length-1; x++)  {
+            for(var y=(x+1); y<temp_opts.length; y++)  {
+                if(temp_opts[x].text > temp_opts[y].text)  {
+                    temp = temp_opts[x].text;
+                    temp_opts[x].text = temp_opts[y].text;
+                    temp_opts[y].text = temp;
+                    temp = temp_opts[x].value;
+                    temp_opts[x].value = temp_opts[y].value;
+                    temp_opts[y].value = temp;
+                }
+            }
+        }
+        for(var i=0; i<box.options.length; i++)  {
+            box.options[i].value = temp_opts[i].value;
+            box.options[i].text = temp_opts[i].text;
+        }
+    }
+    // End -->
+</script>
+</body>
+</html>

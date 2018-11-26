@@ -1,0 +1,27 @@
+[
+  {
+    "id":1,
+    "text":"加班记录",
+    "url":"/kqs/overtime/list.do"
+  },
+  {
+    "id":2,
+    "text":"工作日志",
+    "url":"/kqs/workingLog/list.do"
+  },
+  {
+    "id":3,
+    "text":"发布订餐",
+    "url":"/kqs/order/publish.do"
+  },
+  {
+    "id":5,
+    "text":"订餐模板",
+    "url":"/kqs/order/template.do"
+  },
+  {
+    "id":6,
+    "text":"今日订餐",
+    "url":"/kqs/order/now.do"
+  }
+]

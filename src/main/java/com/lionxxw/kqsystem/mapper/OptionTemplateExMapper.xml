@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lionxxw.kqsystem.mapper.OptionTemplateExMapper" >
+  <update id="addCount" >
+    UPDATE kq_order_dinner_option_template SET COUNT = COUNT + 1 WHERE id = #{tempId}
+  </update>
+
+  <update id="subCount" >
+    UPDATE kq_order_dinner_option_template SET COUNT = COUNT - 1 WHERE id = #{tempId}
+  </update>
+
+  <update id="addCountByOptionId" >
+    UPDATE kq_order_dinner_option_template SET COUNT = COUNT + 1 WHERE id = (SELECT temp_id FROM kq_order_dinner_options WHERE id = #{optionId})
+  </update>
+
+  <update id="subCountByOptionId" >
+    UPDATE kq_order_dinner_option_template SET COUNT = COUNT - 1 WHERE id = (SELECT temp_id FROM kq_order_dinner_options WHERE id = #{optionId})
+  </update>
+</mapper>
